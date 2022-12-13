@@ -1,3 +1,7 @@
+#
+#   simple logger
+#
+
 import colorama
 from colorama import Fore, Style
 import threading
@@ -19,6 +23,10 @@ FMT_DETAIL = 1
 LogLevel_stdout = LOG_WARN       # default log level for stdout
 LogLevel_file   = LOG_DEBUG      # default log level for file
 LogFile = None      # file handler
+LogFormats = [
+    '{date_time} [{loglevel}] <{thread:^10}> {msg}',
+    '{date_time} [{loglevel}] <{thread:^10}> {codeinfo} {msg}',
+]
 
 
 def setloglevel(level):
@@ -56,6 +64,16 @@ def logfile(path, level=LOG_DEBUG, encoding='utf-8'):
     LogLevel_file = level
     return True
 
+
+def format_simple():
+    global LogFormats
+    LogFormats = [
+        '{date_time} [{loglevel}] {msg}',
+        '{date_time} [{loglevel}] {msg}',
+    ]
+    return
+
+
 def debug(msg, fmt=1):
     _log(msg, fmt, LOG_DEBUG, Fore.GREEN)
 
@@ -72,22 +90,17 @@ def crit(msg, fmt=0):
     _log(msg, fmt, LOG_CRIT, Fore.MAGENTA)
 
 
-# ------------------------------------- Private functions
+# -------------------------------------
 
 def _log(msg, fmt, level, color):
-    global LogLevel_stdout, LogLevel_file, LogFile
+    global LogLevel_stdout, LogLevel_file, LogFile, LogFormats
     level_str = ['DBUG', 'INFO', 'WARN', 'ERR ', 'CRIT']
-    log_format = [
-        '{date_time} [{loglevel}] <{thread:^10}> {msg}',
-        '{date_time} [{loglevel}] <{thread:^10}> {codeinfo} {msg}',
-    ]
 
     dt = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     th = threading.current_thread().name
-    #cinfo = f"|{inspect.stack()[2].function:17}|"
     fn = os.path.basename(inspect.stack()[2].filename)
     cinfo = f"|{fn}:{inspect.stack()[2].lineno}:{inspect.stack()[2].function}|"
-    logmsg = log_format[fmt].format(date_time=dt, loglevel=level_str[level], thread=th, codeinfo=cinfo, msg=msg)
+    logmsg = LogFormats[fmt].format(date_time=dt, loglevel=level_str[level], thread=th, codeinfo=cinfo, msg=msg)
 
     if LogLevel_stdout <= level:
         print(color + logmsg + Style.RESET_ALL, flush=True)
