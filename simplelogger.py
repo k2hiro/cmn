@@ -27,7 +27,7 @@ class Simplelogger():
     def __init__(self, level=LOG_WARN):
         self.loglevel_stdout = level           # logging level for STDOUT
         self.logfile = None
-        self.loglevel_file = None       # logging level for file output
+        self.loglevel_file = None              # logging level for file output
         self.logformats = [
             '{date_time} [{loglevel}] <{thread:^10}> {msg}',
             '{date_time} [{loglevel}] <{thread:^10}> {codeinfo} {msg}',     # for DBUG logs
