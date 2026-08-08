@@ -6,6 +6,106 @@ import json
 import sys
 import re
 
+#
+#   2.4GHz channel sets (20/40MHz)
+#
+chlist2G = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14']
+chsets2G = {}
+
+for i in range(14): # 1 - 14
+    chsets2G[chlist2G[i]] = set(chlist2G[max(i-2, 0):min(i+3, len(chlist2G))])
+
+for i in range(9):  # 1+ - 9+
+    chsets2G[chlist2G[i]+'+'] = set(chlist2G[max(i-2, 0):min(i+8, len(chlist2G))])
+
+for i in range(5,14):   # 6- - 14-
+    chsets2G[chlist2G[i]+'-'] = set(chlist2G[max(i-7, 0):min(i+3, len(chlist2G))])
+
+
+#
+#   5GHz channel sets (20/40/80/160MHz)
+#
+chlist = ['36', '40', '44', '48', '52', '56', '60', '64',       # U-NII-1, U-NII-2A
+           '100', '104', '108', '112', '116', '120', '124', '128', '132', '136', '140', '144',  # U-NII-2e
+             '149', '153', '157', '161', '165'  # U-NII-3
+             ]
+chlist40 = ['36', '44', '52', '60', '100', '108', '116', '124', '132', '140', '149', '157']
+chlist80 = ['36', '52', '100', '116', '132', '149']
+chlist160 = ['36', '100']
+chsets5G = {}
+
+for ch in chlist:
+    chsets5G[ch] = {ch}
+for ch in chlist40:
+    ch2 = str(int(ch)+4)
+    chset = {ch, ch2}
+    chsets5G[ch  + '+'] = chset
+    chsets5G[ch2 + '-'] = chset
+for ch in chlist80:
+    ch2 = str(int(ch)+4)
+    ch3 = str(int(ch)+8)
+    ch4 = str(int(ch)+12)
+    chset = {ch, ch2, ch3, ch4}
+    chsets5G[ch  + 'E'] = chset
+    chsets5G[ch2 + 'E'] = chset
+    chsets5G[ch3 + 'E'] = chset
+    chsets5G[ch4 + 'E'] = chset
+for ch in chlist160:
+    ch2 = str(int(ch)+4)
+    ch3 = str(int(ch)+8)
+    ch4 = str(int(ch)+12)
+    ch5 = str(int(ch)+16)
+    ch6 = str(int(ch)+20)
+    ch7 = str(int(ch)+24)
+    ch8 = str(int(ch)+28)
+    chset = {ch, ch2, ch3, ch4, ch5, ch6, ch7, ch8}
+    chsets5G[ch  + 'S'] = chset
+    chsets5G[ch2 + 'S'] = chset
+    chsets5G[ch3 + 'S'] = chset
+    chsets5G[ch4 + 'S'] = chset
+    chsets5G[ch5 + 'S'] = chset
+    chsets5G[ch6 + 'S'] = chset
+    chsets5G[ch7 + 'S'] = chset
+    chsets5G[ch8 + 'S'] = chset
+
+#
+#   6GHz channel sets (20/40/80/160MHz)
+#
+chlist_6G = ['1', '5', '9', '13', '17', '21', '25', '29', '33', '37', '41', '45', '49', '53', '57', '61', '65', '69', '73', '77', '81', '85', '89', '93']
+chsets6G = {}
+
+for ch in chlist_6G:
+    chsets6G[ch] = {ch}
+for i in range(0, len(chlist_6G), 2):
+    ch1 = chlist_6G[i]
+    ch2 = chlist_6G[i+1]
+    chsets6G[ch1 + '+'] = {ch1, ch2}
+    chsets6G[ch2 + '-'] = {ch1, ch2}
+for i in range(0, len(chlist_6G), 4):
+    chset = set(chlist_6G[i:i+4])
+    ch2 = chlist_6G[i+1]    # PSC channel
+    chsets6G[ch2 + 'E'] = chset
+for i in range(0, len(chlist_6G), 8):
+    chset = set(chlist_6G[i:i+8])
+    ch2 = chlist_6G[i+1]    # PSC channel
+    ch6 = chlist_6G[i+5]    # PSC channel
+    chsets6G[ch2 + 'S'] = chset
+    chsets6G[ch6 + 'S'] = chset
+
+
+
+def isintf(band, ch1, ch2):
+    """ch1 と ch2 が干渉するかどうかを判定する。干渉する場合は True を返す。"""
+    if band == '2':
+        return bool(chsets2G[ch1] & chsets2G[ch2])
+    elif band == '5':
+        return bool(chsets5G[ch1] & chsets5G[ch2])
+    elif band == '6':
+        return bool(chsets6G[ch1] & chsets6G[ch2])
+    else:
+        raise ValueError(f"Unknown band: {band}")
+
+
 def _object_attrs(obj):
     """クラスオブジェクトの属性を dict で返す。属性を持たない場合は None。"""
     if isinstance(obj, type) or callable(obj):
