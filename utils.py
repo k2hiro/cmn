@@ -97,10 +97,22 @@ for i in range(0, len(chlist_6G), 8):
 def isintf(band, ch1, ch2):
     """ch1 と ch2 が干渉するかどうかを判定する。干渉する場合は True を返す。"""
     if band == '2':
+        if ch1 not in chsets2G:
+            raise ValueError(f"Unknown 2.4GHz channel: {ch1}")
+        if ch2 not in chsets2G:
+            raise ValueError(f"Unknown 2.4GHz channel: {ch2}")
         return bool(chsets2G[ch1] & chsets2G[ch2])
     elif band == '5':
+        if ch1 not in chsets5G:
+            raise ValueError(f"Unknown 5GHz channel: {ch1}")
+        if ch2 not in chsets5G:
+            raise ValueError(f"Unknown 5GHz channel: {ch2}")
         return bool(chsets5G[ch1] & chsets5G[ch2])
     elif band == '6':
+        if ch1 not in chsets6G:
+            raise ValueError(f"Unknown 6GHz channel: {ch1}")
+        if ch2 not in chsets6G:
+            raise ValueError(f"Unknown 6GHz channel: {ch2}")
         return bool(chsets6G[ch1] & chsets6G[ch2])
     else:
         raise ValueError(f"Unknown band: {band}")
