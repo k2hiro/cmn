@@ -249,3 +249,15 @@ def normalize_mac(s):
     # Format the string into the standard MAC address format
     return ':'.join(s[i:i+2] for i in range(0, 12, 2)).lower()
 
+
+def load_csv(file_path):
+    """
+    Load a CSV file and return its contents as a list of lists.
+    :param file_path: Path to the CSV file.
+    :return: A list of lists representing the rows and columns of the CSV file.
+    """
+    import csv
+    with open(file_path, newline='', encoding='utf-8') as csvfile:
+        reader = csv.reader(csvfile)
+        return [row for row in reader]
+
