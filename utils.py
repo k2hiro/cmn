@@ -5,6 +5,7 @@
 import json
 import sys
 import re
+from datetime import datetime, timezone, timedelta
 
 #
 #   2.4GHz channel sets (20/40MHz)
@@ -25,7 +26,7 @@ for i in range(5,14):   # 6- - 14-
 #
 #   5GHz channel sets (20/40/80/160MHz)
 #
-chlist = ['36', '40', '44', '48', '52', '56', '60', '64',       # U-NII-1, U-NII-2A
+chlist5G = ['36', '40', '44', '48', '52', '56', '60', '64',       # U-NII-1, U-NII-2A
            '100', '104', '108', '112', '116', '120', '124', '128', '132', '136', '140', '144',  # U-NII-2e
              '149', '153', '157', '161', '165'  # U-NII-3
              ]
@@ -34,7 +35,7 @@ chlist80 = ['36', '52', '100', '116', '132', '149']
 chlist160 = ['36', '100']
 chsets5G = {}
 
-for ch in chlist:
+for ch in chlist5G:
     chsets5G[ch] = {ch}
 for ch in chlist40:
     ch2 = str(int(ch)+4)
@@ -71,24 +72,24 @@ for ch in chlist160:
 #
 #   6GHz channel sets (20/40/80/160MHz)
 #
-chlist_6G = ['1', '5', '9', '13', '17', '21', '25', '29', '33', '37', '41', '45', '49', '53', '57', '61', '65', '69', '73', '77', '81', '85', '89', '93']
+chlist6G = ['1', '5', '9', '13', '17', '21', '25', '29', '33', '37', '41', '45', '49', '53', '57', '61', '65', '69', '73', '77', '81', '85', '89', '93']
 chsets6G = {}
 
-for ch in chlist_6G:
+for ch in chlist6G:
     chsets6G[ch] = {ch}
-for i in range(0, len(chlist_6G), 2):
-    ch1 = chlist_6G[i]
-    ch2 = chlist_6G[i+1]
+for i in range(0, len(chlist6G), 2):
+    ch1 = chlist6G[i]
+    ch2 = chlist6G[i+1]
     chsets6G[ch1 + '+'] = {ch1, ch2}
     chsets6G[ch2 + '-'] = {ch1, ch2}
-for i in range(0, len(chlist_6G), 4):
-    chset = set(chlist_6G[i:i+4])
-    ch2 = chlist_6G[i+1]    # PSC channel
+for i in range(0, len(chlist6G), 4):
+    chset = set(chlist6G[i:i+4])
+    ch2 = chlist6G[i+1]    # PSC channel
     chsets6G[ch2 + 'E'] = chset
-for i in range(0, len(chlist_6G), 8):
-    chset = set(chlist_6G[i:i+8])
-    ch2 = chlist_6G[i+1]    # PSC channel
-    ch6 = chlist_6G[i+5]    # PSC channel
+for i in range(0, len(chlist6G), 8):
+    chset = set(chlist6G[i:i+8])
+    ch2 = chlist6G[i+1]    # PSC channel
+    ch6 = chlist6G[i+5]    # PSC channel
     chsets6G[ch2 + 'S'] = chset
     chsets6G[ch6 + 'S'] = chset
 
@@ -194,7 +195,7 @@ def print_dict(d, indent=4, color=None):
     print(format_value(d, indent=indent, color=color))
 
 
-def bytes_to_str(num_bytes, suffix='B'):
+def bytes_to_str(num_bytes, suffix='B', decimals=2):
     """
     Convert a number of bytes to a human-readable string format (e.g., KB, MB, GB).
     
@@ -215,9 +216,9 @@ def bytes_to_str(num_bytes, suffix='B'):
     num_bytes /= 1024.0
     for unit in ['K', 'M', 'G']:
         if num_bytes < 1024.0:
-            return f"{num_bytes:.2f} {unit}{suffix}"
+            return f"{num_bytes:.{decimals}f} {unit}{suffix}"
         num_bytes /= 1024.0
-    return f"{num_bytes:.2f} T{suffix}"
+    return f"{num_bytes:.{decimals}f} T{suffix}"
 
 
 def sec2str(seconds):
@@ -261,3 +262,20 @@ def load_csv(file_path):
         reader = csv.reader(csvfile)
         return [row for row in reader]
 
+def utc2local(utc_str, fmt='%Y-%m-%d %H:%M:%S'):
+    """
+    Convert a UTC time string to local time string.
+    '2026-08-15T12:34:56.000Z' -> '2026-08-15 21:34:56' (JST+9)
+    '2026-08-15T12:34:56Z' -> '2026-08-15 21:34:56' (JST+9)
+
+    :param utc_str: UTC time string in the format 'YYYY-MM-DDTHH:MM:SS.sssZ'.
+    :param fmt: Format string for the output local time.
+    :return: Local time string formatted according to fmt.
+    """
+    try:
+        utc_dt = datetime.strptime(utc_str, '%Y-%m-%dT%H:%M:%S.%fZ')
+    except ValueError:
+        utc_dt = datetime.strptime(utc_str, '%Y-%m-%dT%H:%M:%SZ')
+    utc_dt = utc_dt.replace(tzinfo=timezone.utc)
+    local_dt = utc_dt.astimezone()
+    return local_dt.strftime(fmt)
