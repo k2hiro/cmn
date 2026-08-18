@@ -5,7 +5,29 @@
 import json
 import sys
 import re
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
+
+
+#
+#   ANSI color codes
+#
+class Fore:
+    BLACK = '\x1b[30m'
+    BLUE = '\x1b[34m'
+    CYAN = '\x1b[36m'
+    GREEN = '\x1b[32m'
+    MAGENTA = '\x1b[35m'
+    RED = '\x1b[31m'
+    RESET = '\x1b[39m'
+    WHITE = '\x1b[37m'
+    YELLOW = '\x1b[33m'
+
+class Style:
+    BRIGHT = '\x1b[1m'
+    DIM = '\x1b[2m'
+    NORMAL = '\x1b[22m'
+    RESET_ALL = '\x1b[0m'
+
 
 #
 #   2.4GHz channel sets (20/40MHz)
@@ -134,13 +156,9 @@ def _object_attrs(obj):
     return None
 
 
-CYAN = '\033[36m'
-YELLOW = '\033[33m'
-RESET = '\033[0m'
-
 
 def _paint(text, color, enabled):
-    return f'{color}{text}{RESET}' if enabled else text
+    return f'{color}{text}{Style.RESET_ALL}' if enabled else text
 
 
 def format_value(value, level=0, indent=4, seen=None, color=True):
@@ -156,7 +174,7 @@ def format_value(value, level=0, indent=4, seen=None, color=True):
         return f'{open_str}\n{body}\n{pad}{close_str}'
 
     def key_value(k, v):
-        key = _paint(json.dumps(str(k), ensure_ascii=False), YELLOW, color)
+        key = _paint(json.dumps(str(k), ensure_ascii=False), Fore.YELLOW, color)
         return f'{key}: {format_value(v, level + 1, indent, seen, color)}'
 
     if isinstance(value, (str, bytes, bytearray)) or value is None or isinstance(value, (int, float)):
@@ -180,17 +198,17 @@ def format_value(value, level=0, indent=4, seen=None, color=True):
     if attrs is not None:
         cls = type(value).__name__
         return block(
-            _paint(f'{cls} (', CYAN, color),
+            _paint(f'{cls} (', Fore.CYAN, color),
             [key_value(k, v) for k, v in attrs.items()],
-            _paint(f')  // {cls}', CYAN, color),
+            _paint(f')  // {cls}', Fore.CYAN, color),
         )
 
     return json.dumps(str(value), ensure_ascii=False)
 
 
 def print_dict(d, indent=4, color=None):
-    # color=None なら端末出力のときだけ色付けする
-    if color is None:
+    # 端末出力のときだけ色付けする
+    if color:
         color = sys.stdout.isatty()
     print(format_value(d, indent=indent, color=color))
 
