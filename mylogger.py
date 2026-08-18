@@ -2,14 +2,30 @@
 #   simple logger
 #
 
-import colorama
-from colorama import Fore, Style
+# import colorama
+# from colorama import Fore, Style
 import threading
 import datetime
 import os
 import inspect
 
-colorama.init(strip=False)
+# colorama.init(strip=False)
+class Fore:
+    BLACK = '\x1b[30m'
+    BLUE = '\x1b[34m'
+    CYAN = '\x1b[36m'
+    GREEN = '\x1b[32m'
+    MAGENTA = '\x1b[35m'
+    RED = '\x1b[31m'
+    RESET = '\x1b[39m'
+    WHITE = '\x1b[37m'
+    YELLOW = '\x1b[33m'
+
+class Style:
+    BRIGHT = '\x1b[1m'
+    DIM = '\x1b[2m'
+    NORMAL = '\x1b[22m'
+    RESET_ALL = '\x1b[0m'
 
 LOG_DEBUG = 0
 LOG_DBUG = 0
@@ -24,8 +40,8 @@ LogLevel_stdout = LOG_WARN       # default log level for stdout
 LogLevel_file   = LOG_DEBUG      # default log level for file
 LogFile = None      # file handler
 LogFormats = [
-    '{date_time} [{loglevel}] <{thread:^10}> {msg}',
-    '{date_time} [{loglevel}] <{thread:^10}> {codeinfo} {msg}',
+    '{date_time} [{loglevel}] <{thread:^10}> {msg}',                # for LOG_INFO or above
+    '{date_time} [{loglevel}] <{thread:^10}> {codeinfo} {msg}',     # for LOG_DEBUG
 ]
 
 
