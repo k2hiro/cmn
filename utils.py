@@ -206,7 +206,7 @@ def format_value(value, level=0, indent=4, seen=None, color=True):
     return json.dumps(str(value), ensure_ascii=False)
 
 
-def print_dict(d, indent=4, color=None):
+def print_dict(d, indent=4, color=True):
     # 端末出力のときだけ色付けする
     if color:
         color = sys.stdout.isatty()
