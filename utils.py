@@ -239,6 +239,26 @@ def bytes_to_str(num_bytes, suffix='B', decimals=2):
     return f"{num_bytes:.{decimals}f} T{suffix}"
 
 
+def sec2str_full(seconds):
+    """
+    Convert seconds to a human-readable string format (days, hours, minutes, seconds).
+    
+    :param seconds: Number of seconds to convert.
+    :return: A string representing the time in days, hours, minutes, and seconds.
+    """
+    days = seconds // 86400
+    hours = (seconds % 86400) // 3600
+    minutes = (seconds % 3600) // 60
+    secs = seconds % 60
+    if days > 0:
+        return f"{days}d {hours}h {minutes}m {secs}s"
+    if hours > 0:
+        return f"{hours}h {minutes}m {secs}s"
+    if minutes > 0:
+        return f"{minutes}m {secs}s"
+    return f"{secs}s"
+
+
 def sec2str(seconds):
     """
     Convert seconds to a human-readable string format (days, hours, minutes, seconds).
@@ -250,7 +270,14 @@ def sec2str(seconds):
     hours = (seconds % 86400) // 3600
     minutes = (seconds % 3600) // 60
     secs = seconds % 60
-    return f"{days}d {hours}h {minutes}m {secs}s"
+    if days > 0:
+        return f"{days} days"
+    if hours > 0:
+        return f"{hours} hours"
+    if minutes > 0:
+        return f"{minutes} minutes"
+    return f"{secs} seconds"
+
 
 
 def normalize_mac(s):
